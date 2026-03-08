@@ -214,9 +214,14 @@ td{padding:9px 13px;vertical-align:middle}
     <h2 style="font-size:18px;color:var(--navy);margin-bottom:18px;font-weight:700">➕ เพิ่ม Vendor ใหม่</h2>
     <div class="fgrid">
       <div class="fg"><label>Vendor ID <span style="color:var(--red)">*</span></label>
-        <input type="text" id="fi" placeholder="เช่น PILING-049, MEP-012"></div>
+        <div style="display:flex;gap:6px">
+          <input type="text" id="fi" placeholder="เลือกหมวดหมู่ก่อน" style="flex:1">
+          <button type="button" class="btn b-outline b-sm" onclick="genID()" title="สร้าง ID อัตโนมัติ">🔄</button>
+        </div>
+        <div id="id-hint" style="font-size:11px;color:#888;margin-top:3px"></div>
+      </div>
       <div class="fg"><label>หมวดหมู่</label>
-        <select id="fcat"><option value="">— เลือก —</option>
+        <select id="fcat" onchange="genID()"><option value="">— เลือก —</option>
           <option>Structure</option><option>Civil</option><option>MEP</option>
           <option>Architectural</option><option>Special</option><option>Support</option>
           <option>Piling</option><option>Electrical</option><option>Geotechnical</option>
@@ -494,7 +499,34 @@ async function addV(){
   }catch(e){msg.className='fmsg err';msg.textContent='❌ เกิดข้อผิดพลาด';}
   finally{btn.innerHTML='✅ บันทึก Vendor';btn.disabled=false;}
 }
-function clrForm(){
+// ══ AUTO ID ═══════════════════════════════════════════════════════
+var CAT_PREFIX={
+  'Structure':'STR','Civil':'CIV','MEP':'MEP','Architectural':'ARC',
+  'Special':'SPE','Support':'SUP','Piling':'PIL','Electrical':'ELE','Geotechnical':'GEO'
+};
+function genID(){
+  var cat=g('fcat').value;
+  var hint=g('id-hint');
+  if(!cat){
+    g('fi').placeholder='เลือกหมวดหมู่ก่อน';
+    hint.textContent='';
+    return;
+  }
+  var prefix=CAT_PREFIX[cat]||cat.slice(0,3).toUpperCase();
+  // หา ID สูงสุดของ prefix นี้
+  var max=0;
+  vendors.forEach(function(v){
+    if(v.id && v.id.startsWith(prefix+'-')){
+      var num=parseInt(v.id.split('-')[1])||0;
+      if(num>max) max=num;
+    }
+  });
+  var next=prefix+'-'+(String(max+1).padStart(3,'0'));
+  g('fi').value=next;
+  hint.textContent='ล่าสุด: '+(max>0?prefix+'-'+String(max).padStart(3,'0'):'ยังไม่มี')+' → แนะนำ: '+next;
+}
+
+
   ['fi','fit','fn','fco','fph','fem','fpr','fcm'].forEach(function(x){g(x).value=''});
   g('fcat').value='';g('frg').value='';g('fmsg').className='fmsg';
   g('fpv').innerHTML='<option value="">— เลือกภาคก่อน —</option>';
