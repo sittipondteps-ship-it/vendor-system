@@ -6,7 +6,6 @@
 <title>Vendor Management System</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 :root{
   --navy:#1F3864;--blue:#2E75B6;--lblue:#D6E4F7;--dblue:#0f1e38;
@@ -197,8 +196,13 @@ td{padding:9px 13px;vertical-align:middle}
     <div class="loading" id="tload">⏳ กำลังโหลดข้อมูล...</div>
     <table id="vtable" style="display:none">
       <thead><tr>
-        <th>#</th><th>Vendor ID</th><th>รายการงาน</th><th>ชื่อบริษัท</th>
-        <th>ผู้ติดต่อ</th><th>Phone</th><th>หมวด</th><th>ภาค/จังหวัด</th><th></th>
+        <th>#</th>
+        <th onclick="sortBy('id')" style="cursor:pointer">Vendor ID <span id="s-id"></span></th>
+        <th onclick="sortBy('item')" style="cursor:pointer">รายการงาน <span id="s-item"></span></th>
+        <th onclick="sortBy('name')" style="cursor:pointer">ชื่อบริษัท <span id="s-name"></span></th>
+        <th>ผู้ติดต่อ / Line</th><th>Phone</th>
+        <th onclick="sortBy('cat')" style="cursor:pointer">หมวด <span id="s-cat"></span></th>
+        <th onclick="sortBy('region')" style="cursor:pointer">ภาค/จังหวัด <span id="s-region"></span></th><th></th>
       </tr></thead>
       <tbody id="tb"></tbody>
     </table>
@@ -232,8 +236,15 @@ td{padding:9px 13px;vertical-align:middle}
         <input type="text" id="fn" placeholder="ชื่อเต็มของบริษัทหรือบุคคล"></div>
       <div class="fg"><label>ชื่อผู้ติดต่อ</label>
         <input type="text" id="fco" placeholder="ชื่อ-นามสกุล"></div>
+      <div class="fg"><label>ประเภทนิติบุคคล</label>
+        <select id="fent"><option value="">— เลือก —</option>
+          <option>บริษัทจำกัด</option><option>ห้างหุ้นส่วนจำกัด</option>
+          <option>บุคคลธรรมดา</option><option>อื่นๆ</option>
+        </select></div>
       <div class="fg"><label>Phone <span style="color:var(--red)">*</span></label>
         <input type="text" id="fph" placeholder="xxx-xxx-xxxx"></div>
+      <div class="fg"><label>Line ID</label>
+        <input type="text" id="fline" placeholder="@line หรือ ID"></div>
       <div class="fg"><label>Email</label>
         <input type="text" id="fem" placeholder="email@company.com"></div>
       <div class="fg"><label>ภาค</label>
@@ -298,7 +309,13 @@ td{padding:9px 13px;vertical-align:middle}
       <div class="fg full"><label>รายการงาน</label><input type="text" id="eit"></div>
       <div class="fg full"><label>ชื่อ Vendor / บริษัท</label><input type="text" id="en"></div>
       <div class="fg"><label>ผู้ติดต่อ</label><input type="text" id="eco"></div>
+      <div class="fg"><label>ประเภทนิติบุคคล</label>
+        <select id="eent"><option value="">— เลือก —</option>
+          <option>บริษัทจำกัด</option><option>ห้างหุ้นส่วนจำกัด</option>
+          <option>บุคคลธรรมดา</option><option>อื่นๆ</option>
+        </select></div>
       <div class="fg"><label>Phone</label><input type="text" id="eph"></div>
+      <div class="fg"><label>Line ID</label><input type="text" id="eline" placeholder="@line หรือ ID"></div>
       <div class="fg"><label>Email</label><input type="text" id="eem"></div>
       <div class="fg"><label>ภาค</label>
         <select id="erg" onchange="updateProvinces('erg','epv')"><option value="">— เลือก —</option>
@@ -319,6 +336,7 @@ td{padding:9px 13px;vertical-align:middle}
 
 <script>
 var vendors=[], cur=-1;
+var sortCol='', sortAsc=true;
 var API = window.location.origin + '/api';
 
 function g(id){return document.getElementById(id)}
@@ -363,7 +381,17 @@ function goTab(name){
   if(name==='search') setTimeout(function(){g('sq').focus()},100);
 }
 
-// ══ PROVINCES ═════════════════════════════════════════════════════
+// ══ SORT ══════════════════════════════════════════════════════════
+function sortBy(col){
+  if(sortCol===col) sortAsc=!sortAsc; else{sortCol=col;sortAsc=true;}
+  ['id','item','name','cat','region'].forEach(function(c){
+    var el=g('s-'+c);
+    if(el) el.textContent=c===sortCol?(sortAsc?' ▲':' ▼'):'';
+  });
+  search();
+}
+
+
 var PROVINCES={
   'กลาง':['กรุงเทพมหานคร','นนทบุรี','ปทุมธานี','พระนครศรีอยุธยา','อ่างทอง','ลพบุรี','สิงห์บุรี','ชัยนาท','สระบุรี','นครนายก','สุพรรณบุรี','นครปฐม','สมุทรสาคร','สมุทรสงคราม','สมุทรปราการ'],
   'เหนือ':['เชียงใหม่','เชียงราย','ลำพูน','ลำปาง','อุตรดิตถ์','แพร่','น่าน','พะเยา','แม่ฮ่องสอน','สุโขทัย','พิษณุโลก','พิจิตร','กำแพงเพชร','ตาก','นครสวรรค์','อุทัยธานี','เพชรบูรณ์'],
@@ -386,11 +414,17 @@ function updateProvinces(rgId, pvId, selectedVal){
 function search(){
   var q=g('sq').value.trim(), cat=g('sc').value, reg=g('sr').value;
   var res=vendors.filter(function(v){
-    var t=v.id+' '+v.item+' '+v.name+' '+v.contact+' '+v.phone+' '+v.email+' '+v.province+' '+v.project;
+    var t=v.id+' '+v.item+' '+v.name+' '+v.contact+' '+v.phone+' '+v.email+' '+v.province+' '+v.project+' '+(v.line||'');
     var catMatch = !cat || (cat==='__empty__' ? !v.cat : v.cat===cat);
     var regMatch = !reg || (reg==='__empty__' ? !v.region : v.region===reg);
     return(!q||t.indexOf(q)>=0)&&catMatch&&regMatch;
   });
+  if(sortCol){
+    res.sort(function(a,b){
+      var av=(a[sortCol]||'').toLowerCase(), bv=(b[sortCol]||'').toLowerCase();
+      return sortAsc?(av>bv?1:-1):(av<bv?1:-1);
+    });
+  }
   renderTable(res);
 }
 function clearS(){g('sq').value='';g('sc').value='';g('sr').value='';renderTable(vendors);g('sq').focus()}
@@ -406,12 +440,13 @@ function renderTable(data){
   tb.innerHTML=data.map(function(v,i){
     var idx=vendors.indexOf(v);
     var rp=[v.region,v.province].filter(Boolean).join(' / ')||'<span class="miss">ไม่ระบุ</span>';
+    var contactLine=v.contact||(v.line?'Line: '+v.line:'')||'<span class="miss">-</span>';
     return'<tr onclick="showD('+idx+')">'
       +'<td style="color:#aaa;font-size:12px;font-family:IBM Plex Mono,monospace">'+(i+1)+'</td>'
       +'<td class="tid">'+esc(v.id)+'</td>'
       +'<td class="titem" title="'+esc(v.item)+'">'+esc(v.item&&v.item.length>40?v.item.slice(0,40)+'…':v.item||'')+'</td>'
       +'<td class="tname" title="'+esc(v.name)+'">'+esc(v.name&&v.name.length>24?v.name.slice(0,24)+'…':v.name||'')+'</td>'
-      +'<td>'+(v.contact||'<span class="miss">-</span>')+'</td>'
+      +'<td><div>'+contactLine+'</div>'+(v.line?'<div style="font-size:11px;color:#4CAF50">💬 '+esc(v.line)+'</div>':'')+'</td>'
       +'<td class="tph">'+(v.phone||'<span class="miss">-</span>')+'</td>'
       +'<td><span class="bdg '+bCls(v.cat)+'">'+esc(v.cat||'?')+'</span></td>'
       +'<td>'+rp+'</td>'
@@ -430,8 +465,10 @@ function showD(idx){
     +'<div class="di"><label>หมวดหมู่</label><div class="v"><span class="bdg '+bCls(v.cat)+'">'+esc(v.cat||'?')+'</span></div></div>'
     +'<div class="di full"><label>รายการงาน / บริการ</label><div class="v">'+m(v.item)+'</div></div>'
     +'<div class="di full"><label>ชื่อ Vendor / บริษัท</label><div class="v" style="font-size:18px">'+m(v.name)+'</div></div>'
+    +'<div class="di"><label>🏢 ประเภทนิติบุคคล</label><div class="v">'+m(v.entity)+'</div></div>'
     +'<div class="di"><label>👤 ผู้ติดต่อ</label><div class="v">'+m(v.contact)+'</div></div>'
     +'<div class="di"><label>📞 Phone</label><div class="v" style="color:var(--blue);font-family:IBM Plex Mono,monospace">'+m(v.phone)+'</div></div>'
+    +'<div class="di"><label>💬 Line ID</label><div class="v" style="color:#4CAF50">'+m(v.line)+'</div></div>'
     +'<div class="di"><label>📧 Email</label><div class="v">'+m(v.email)+'</div></div>'
     +'<div class="di"><label>🗺️ ภาค / จังหวัด</label><div class="v">'+(v.region&&v.province?v.region+' / '+v.province:(v.region||v.province||'<span class="miss">ไม่ระบุ</span>'))+'</div></div>'
     +'<div class="di full"><label>โครงการอ้างอิง</label><div class="v" style="font-size:13px">'+m(v.project)+'</div></div>'
@@ -448,6 +485,7 @@ function openEdit(){
   g('ei').value=v.id;g('eit').value=v.item||'';g('en').value=v.name||'';
   g('eco').value=v.contact||'';g('eph').value=v.phone||'';g('eem').value=v.email||'';
   g('ec').value=v.cat||'';g('erg').value=v.region||'';
+  g('eent').value=v.entity||'';g('eline').value=v.line||'';
   updateProvinces('erg','epv',v.province||'');
   g('epr').value=v.project||'';g('ecm').value=v.comment||'';
   closeDM();g('em').classList.add('on');
@@ -458,7 +496,8 @@ async function saveEdit(){
   var v=vendors[cur];
   var data={id:v.id,item:g('eit').value,name:g('en').value,contact:g('eco').value,
     phone:g('eph').value,email:g('eem').value,cat:g('ec').value,region:g('erg').value,
-    province:g('epv').value,project:g('epr').value,comment:g('ecm').value,status:v.status||'Active'};
+    province:g('epv').value,project:g('epr').value,comment:g('ecm').value,
+    entity:g('eent').value,line:g('eline').value,status:v.status||'Active'};
   try{
     var res=await api('/vendors/'+v.id,'PUT',data);
     if(res.ok){closeEM();await loadVendors();showToast('✅ แก้ไข '+v.id+' เรียบร้อย');}
@@ -490,7 +529,8 @@ async function addV(){
   try{
     var res=await api('/vendors','POST',{id,item,name,contact:g('fco').value,phone,
       email:g('fem').value,cat:g('fcat').value,region:g('frg').value,
-      province:g('fpv').value,project:g('fpr').value,comment:g('fcm').value});
+      province:g('fpv').value,project:g('fpr').value,comment:g('fcm').value,
+      entity:g('fent').value,line:g('fline').value});
     if(res.ok){
       msg.className='fmsg ok';msg.textContent='✅ เพิ่ม '+id+' เรียบร้อยแล้ว!';
       clrForm();await loadVendors();
@@ -527,9 +567,11 @@ function genID(){
 }
 
 
-  ['fi','fit','fn','fco','fph','fem','fpr','fcm'].forEach(function(x){g(x).value=''});
-  g('fcat').value='';g('frg').value='';g('fmsg').className='fmsg';
+function clrForm(){
+  ['fi','fit','fn','fco','fph','fem','fpr','fcm','fline'].forEach(function(x){g(x).value=''});
+  g('fcat').value='';g('frg').value='';g('fent').value='';g('fmsg').className='fmsg';
   g('fpv').innerHTML='<option value="">— เลือกภาคก่อน —</option>';
+  g('id-hint').textContent='';
 }
 
 // ══ DASHBOARD ═════════════════════════════════════════════════════
@@ -591,30 +633,25 @@ function exportExcel(){
     var regMatch=!reg||(reg==='__empty__'?!v.region:v.region===reg);
     return(!q||t.indexOf(q)>=0)&&catMatch&&regMatch;
   });
-  var rows=data.map(function(v,i){return{
-    '#':i+1,
-    'Vendor ID':v.id||'',
-    'รายการงาน / บริการ':v.item||'',
-    'ชื่อ Vendor / บริษัท':v.name||'',
-    'ผู้ติดต่อ':v.contact||'',
-    'Phone':v.phone||'',
-    'Email':v.email||'',
-    'หมวดหมู่':v.cat||'',
-    'ภาค':v.region||'',
-    'จังหวัด':v.province||'',
-    'โครงการอ้างอิง':v.project||'',
-    'หมายเหตุ':v.comment||'',
-    'วันที่อัปเดต':v.updated||'',
-    'สถานะ':v.status||''
-  };});
-  var ws=XLSX.utils.json_to_sheet(rows);
-  // ปรับความกว้างคอลัมน์
-  ws['!cols']=[{wch:4},{wch:12},{wch:40},{wch:30},{wch:18},{wch:20},{wch:25},{wch:14},{wch:10},{wch:16},{wch:20},{wch:20},{wch:14},{wch:10}];
-  var wb=XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb,ws,'Vendors');
-  var fname='vendors_'+new Date().toISOString().slice(0,10)+'.xlsx';
-  XLSX.writeFile(wb,fname);
-  showToast('⬇️ Export Excel '+data.length+' รายการ');
+  var cols=[
+    ['#',''],['Vendor ID','id'],['รายการงาน / บริการ','item'],['ชื่อ Vendor / บริษัท','name'],
+    ['ประเภทนิติบุคคล','entity'],['ผู้ติดต่อ','contact'],['Phone','phone'],['Line ID','line'],
+    ['Email','email'],['หมวดหมู่','cat'],['ภาค','region'],['จังหวัด','province'],
+    ['โครงการอ้างอิง','project'],['หมายเหตุ','comment'],['วันที่อัปเดต','updated'],['สถานะ','status']
+  ];
+  var csv=cols.map(function(c){return'"'+c[0]+'"'}).join(',')+'\n';
+  csv+=data.map(function(v,i){
+    return cols.map(function(c,ci){
+      var val=ci===0?(i+1).toString():(v[c[1]]||'');
+      return'"'+val.toString().replace(/"/g,'""')+'"';
+    }).join(',');
+  }).join('\n');
+  var blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='vendors_'+new Date().toISOString().slice(0,10)+'.csv';
+  a.click();
+  showToast('⬇️ Export '+data.length+' รายการ (เปิดด้วย Excel ได้เลย)');
 }
 
 
