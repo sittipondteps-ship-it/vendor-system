@@ -25,6 +25,10 @@ def fmt(v):
 def index():
     return send_from_directory('static', 'index.html')
 
+@app.route('/<path:filename>')
+def static_files(filename):
+    return send_from_directory('static', filename)
+
 @app.route('/api/vendors', methods=['GET'])
 def get_vendors():
     vendors = list(col.find({}, {'_id': 0}))
