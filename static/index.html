@@ -6,6 +6,7 @@
 <title>Vendor Management System</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 :root{
   --navy:#1F3864;--blue:#2E75B6;--lblue:#D6E4F7;--dblue:#0f1e38;
@@ -186,7 +187,11 @@ td{padding:9px 13px;vertical-align:middle}
   </div>
   <div class="rinfo">
     <span id="ri">⏳ กำลังโหลด...</span>
-    <button class="btn b-green b-sm" onclick="goTab('add')">➕ เพิ่ม Vendor ใหม่</button>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <button class="btn b-outline b-sm" onclick="exportJSON()">⬇️ Export JSON</button>
+      <button class="btn b-outline b-sm" onclick="exportExcel()">⬇️ Export Excel</button>
+      <button class="btn b-green b-sm" onclick="goTab('add')">➕ เพิ่ม Vendor ใหม่</button>
+    </div>
   </div>
   <div class="twrap">
     <div class="loading" id="tload">⏳ กำลังโหลดข้อมูล...</div>
@@ -530,7 +535,57 @@ async function loadDash(){
   }catch(e){g('kg').innerHTML='<div style="color:#C00000">❌ โหลดไม่สำเร็จ</div>';}
 }
 
-// ══ TOAST ═════════════════════════════════════════════════════════
+// ══ EXPORT ════════════════════════════════════════════════════════
+function exportJSON(){
+  var q=g('sq').value.trim(),cat=g('sc').value,reg=g('sr').value;
+  var data=vendors.filter(function(v){
+    var t=v.id+' '+v.item+' '+v.name+' '+v.contact+' '+v.phone+' '+v.email+' '+v.province+' '+v.project;
+    var catMatch=!cat||(cat==='__empty__'?!v.cat:v.cat===cat);
+    var regMatch=!reg||(reg==='__empty__'?!v.region:v.region===reg);
+    return(!q||t.indexOf(q)>=0)&&catMatch&&regMatch;
+  });
+  var blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='vendors_export_'+new Date().toISOString().slice(0,10)+'.json';
+  a.click();
+  showToast('⬇️ Export JSON '+data.length+' รายการ');
+}
+function exportExcel(){
+  var q=g('sq').value.trim(),cat=g('sc').value,reg=g('sr').value;
+  var data=vendors.filter(function(v){
+    var t=v.id+' '+v.item+' '+v.name+' '+v.contact+' '+v.phone+' '+v.email+' '+v.province+' '+v.project;
+    var catMatch=!cat||(cat==='__empty__'?!v.cat:v.cat===cat);
+    var regMatch=!reg||(reg==='__empty__'?!v.region:v.region===reg);
+    return(!q||t.indexOf(q)>=0)&&catMatch&&regMatch;
+  });
+  var rows=data.map(function(v,i){return{
+    '#':i+1,
+    'Vendor ID':v.id||'',
+    'รายการงาน / บริการ':v.item||'',
+    'ชื่อ Vendor / บริษัท':v.name||'',
+    'ผู้ติดต่อ':v.contact||'',
+    'Phone':v.phone||'',
+    'Email':v.email||'',
+    'หมวดหมู่':v.cat||'',
+    'ภาค':v.region||'',
+    'จังหวัด':v.province||'',
+    'โครงการอ้างอิง':v.project||'',
+    'หมายเหตุ':v.comment||'',
+    'วันที่อัปเดต':v.updated||'',
+    'สถานะ':v.status||''
+  };});
+  var ws=XLSX.utils.json_to_sheet(rows);
+  // ปรับความกว้างคอลัมน์
+  ws['!cols']=[{wch:4},{wch:12},{wch:40},{wch:30},{wch:18},{wch:20},{wch:25},{wch:14},{wch:10},{wch:16},{wch:20},{wch:20},{wch:14},{wch:10}];
+  var wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Vendors');
+  var fname='vendors_'+new Date().toISOString().slice(0,10)+'.xlsx';
+  XLSX.writeFile(wb,fname);
+  showToast('⬇️ Export Excel '+data.length+' รายการ');
+}
+
+
 function showToast(msg,isErr){
   var t=document.getElementById('toast');
   if(!t){t=document.createElement('div');t.id='toast';t.className='toast';document.body.appendChild(t);}
