@@ -435,10 +435,7 @@ async function saveEdit(){
 // ══ DELETE ════════════════════════════════════════════════════════
 async function delV(){
   var v=vendors[cur];
-  if(!confirm('ลบ Vendor: '+v.id+'
-'+v.name+'
-
-ยืนยันการลบ?')) return;
+  if(!confirm('ลบ Vendor: '+v.id+'\n'+v.name+'\n\nยืนยันการลบ?')) return;
   try{
     var res=await api('/vendors/'+v.id,'DELETE');
     if(res.ok){closeDM();await loadVendors();showToast('🗑️ ลบ '+v.id+' เรียบร้อย');}
