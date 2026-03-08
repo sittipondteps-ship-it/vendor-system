@@ -373,7 +373,7 @@ function renderTable(data){
     var idx=vendors.indexOf(v);
     var rp=[v.region,v.province].filter(Boolean).join(' / ')||'<span class="miss">ไม่ระบุ</span>';
     return'<tr onclick="showD('+idx+')">'
-      +'<td style="color:#aaa;font-size:12px;font-family:'IBM Plex Mono',monospace">'+(i+1)+'</td>'
+      +'<td style="color:#aaa;font-size:12px;font-family:IBM Plex Mono,monospace">'+(i+1)+'</td>'
       +'<td class="tid">'+esc(v.id)+'</td>'
       +'<td class="titem" title="'+esc(v.item)+'">'+esc(v.item&&v.item.length>40?v.item.slice(0,40)+'…':v.item||'')+'</td>'
       +'<td class="tname" title="'+esc(v.name)+'">'+esc(v.name&&v.name.length>24?v.name.slice(0,24)+'…':v.name||'')+'</td>'
