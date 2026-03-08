@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Vendor Management System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#1F3864;--blue:#2E75B6;--lblue:#D6E4F7;--dblue:#0f1e38;
+  --green:#375623;--lgreen:#E2EFDA;
+  --red:#C00000;--lred:#FFDEDE;
+  --gold:#BF8F00;--lgold:#FFF2CC;
+  --gray:#f0f4f8;--dgray:#555;
+  --white:#fff;--border:#e0e8f0;
+  --radius:10px;--shadow:0 2px 12px rgba(0,0,0,.08);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Sarabun",sans-serif;font-size:15px;background:var(--gray);color:#1a1a2e;min-height:100vh}
+/* header */
+.hdr{background:linear-gradient(135deg,var(--dblue),var(--blue));color:#fff;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;box-shadow:0 2px 12px rgba(0,0,0,.25)}
+.hdr-left h1{font-size:20px;font-weight:700;letter-spacing:.3px}
+.hdr-left p{font-size:12px;opacity:.75;margin-top:2px}
+.pills{display:flex;gap:8px;flex-wrap:wrap}
+.pill{background:rgba(255,255,255,.15);border-radius:20px;padding:4px 14px;font-size:13px;backdrop-filter:blur(4px)}
+.pill.ok{background:rgba(55,86,35,.7)}
+.pill.warn{background:rgba(192,0,0,.7)}
+/* tabs */
+.tabbar{background:var(--dblue);display:flex;padding:0 24px;gap:2px;overflow-x:auto;border-bottom:1px solid rgba(255,255,255,.08)}
+.tab{padding:11px 20px;color:rgba(255,255,255,.55);cursor:pointer;border-bottom:3px solid transparent;font-size:14px;font-weight:600;transition:.2s;white-space:nowrap;letter-spacing:.2px}
+.tab:hover{color:#fff;background:rgba(255,255,255,.06)}
+.tab.on{color:#fff;border-bottom-color:#FFD700}
+/* panels */
+.pnl{display:none;padding:20px 24px;animation:fadeIn .2s}
+.pnl.on{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+/* card */
+.card{background:var(--white);border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow);margin-bottom:16px;border:1px solid var(--border)}
+/* search row */
+.srow{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.fg{display:flex;flex-direction:column;gap:5px;flex:1;min-width:150px}
+.fg label{font-size:12px;font-weight:700;color:var(--dgray);letter-spacing:.3px;text-transform:uppercase}
+input,select,textarea{width:100%;padding:9px 13px;border:1.5px solid var(--border);border-radius:8px;font-size:15px;font-family:inherit;outline:none;background:var(--white);transition:border .2s,box-shadow .2s;color:#1a1a2e}
+input:focus,select:focus,textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(46,117,182,.1)}
+/* buttons */
+.btn{padding:9px 18px;border:none;border-radius:8px;cursor:pointer;font-size:14px;font-family:inherit;font-weight:700;transition:.2s;white-space:nowrap;letter-spacing:.2px}
+.b-blue{background:var(--blue);color:#fff} .b-blue:hover{background:#1a5a9a;transform:translateY(-1px)}
+.b-green{background:var(--green);color:#fff} .b-green:hover{background:#254018;transform:translateY(-1px)}
+.b-red{background:var(--red);color:#fff} .b-red:hover{background:#900000}
+.b-gray{background:#888;color:#fff} .b-gray:hover{background:#666}
+.b-amber{background:var(--gold);color:#fff} .b-amber:hover{background:#9a7300}
+.b-outline{background:transparent;color:var(--blue);border:1.5px solid var(--blue)} .b-outline:hover{background:var(--lblue)}
+.b-sm{padding:5px 11px;font-size:13px;border-radius:6px}
+/* result info */
+.rinfo{font-size:13px;color:var(--dgray);margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+/* table */
+.twrap{background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);overflow:auto;border:1px solid var(--border);max-height:63vh}
+table{width:100%;border-collapse:collapse;font-size:14px;min-width:680px}
+thead th{background:var(--navy);color:#fff;padding:11px 13px;text-align:left;font-size:12px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;white-space:nowrap;position:sticky;top:0;z-index:2}
+tbody tr{border-bottom:1px solid #f0f4f8;transition:.15s;cursor:pointer}
+tbody tr:hover{background:#eef4ff}
+tbody tr:nth-child(even){background:#f8fafd}
+tbody tr:nth-child(even):hover{background:#e4eeff}
+td{padding:9px 13px;vertical-align:middle}
+.tid{font-family:"IBM Plex Mono",monospace;font-size:12px;font-weight:600;color:var(--navy);white-space:nowrap}
+.tname{font-weight:700;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.titem{color:#555;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px}
+.tph{color:var(--blue);white-space:nowrap;font-size:13px;font-family:"IBM Plex Mono",monospace}
+.miss{color:#ccc;font-style:italic;font-size:12px}
+/* badges */
+.bdg{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.3px;white-space:nowrap}
+.bS{background:#D6E4F7;color:#1F3864}.bC{background:#E2EFDA;color:#375623}
+.bM{background:#FFF2CC;color:#BF8F00}.bA{background:#FCE4D6;color:#C55A11}
+.bP{background:#FFDEDE;color:#C00000}.bE{background:#D6EEF2;color:#1F7C8E}
+.bX{background:#eee;color:#666}
+/* no results */
+.nores{text-align:center;padding:60px 20px;color:#aaa}
+.nores .ic{font-size:48px;margin-bottom:12px}
+/* loading */
+.loading{text-align:center;padding:40px;color:#888;font-size:14px}
+/* modal */
+.ov{display:none;position:fixed;inset:0;background:rgba(10,20,40,.55);z-index:999;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(2px)}
+.ov.on{display:flex;animation:fadeIn .2s}
+.modal{background:var(--white);border-radius:16px;padding:28px;width:100%;max-width:600px;max-height:92vh;overflow-y:auto;box-shadow:0 16px 48px rgba(0,0,0,.2)}
+.modal-hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;gap:12px}
+.modal-hdr h2{font-size:18px;color:var(--navy);line-height:1.3}
+.dgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:8px}
+.di label{font-size:11px;color:#999;font-weight:700;letter-spacing:.5px;text-transform:uppercase;display:block;margin-bottom:3px}
+.di .v{font-size:15px;font-weight:600;word-break:break-word}
+.di.full{grid-column:1/-1}
+.mact{display:flex;gap:8px;margin-top:20px;padding-top:16px;border-top:1px solid var(--border);flex-wrap:wrap}
+/* form */
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.fgrid .fg.full{grid-column:1/-1}
+.fmsg{margin-top:12px;font-size:14px;padding:10px 14px;border-radius:8px;display:none;font-weight:600}
+.fmsg.err{background:var(--lred);color:var(--red);display:block}
+.fmsg.ok{background:var(--lgreen);color:var(--green);display:block}
+/* dashboard */
+.kgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:14px;margin-bottom:22px}
+.kc{background:var(--white);border-radius:var(--radius);padding:20px 16px;box-shadow:var(--shadow);text-align:center;border-top:4px solid;border:1px solid var(--border);border-top-width:4px;transition:.2s}
+.kc:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.1)}
+.kc .kv{font-size:34px;font-weight:700;margin:6px 0 3px;font-family:"IBM Plex Mono",monospace}
+.kc .kl{font-size:12px;color:var(--dgray);font-weight:600;letter-spacing:.3px}
+.dsec{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.sec-title{font-size:15px;font-weight:700;color:var(--navy);margin:0 0 12px;padding-bottom:8px;border-bottom:2px solid var(--border);letter-spacing:.2px}
+.cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:8px}
+.cc{background:var(--white);border-radius:var(--radius);padding:12px 16px;box-shadow:0 1px 6px rgba(0,0,0,.06);display:flex;justify-content:space-between;align-items:center;border-left:4px solid var(--blue);border:1px solid var(--border);border-left-width:4px}
+.cc .cn{font-weight:700;font-size:14px}
+.cc .cv{font-size:22px;font-weight:700;color:var(--blue);font-family:"IBM Plex Mono",monospace}
+.qwrap{background:var(--white);border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow);border:1px solid var(--border)}
+.qrow{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.qlbl{width:105px;font-size:13px;font-weight:700;flex-shrink:0;color:#444}
+.qbg{flex:1;background:#eee;border-radius:8px;height:12px;overflow:hidden}
+.qfill{height:100%;border-radius:8px;transition:width .7s cubic-bezier(.4,0,.2,1)}
+.qpct{width:40px;text-align:right;font-size:13px;font-weight:700;font-family:"IBM Plex Mono",monospace}
+/* toast */
+.toast{position:fixed;bottom:24px;right:24px;padding:13px 20px;border-radius:10px;font-size:14px;font-weight:700;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.2);transition:opacity .35s,transform .35s;max-width:320px;pointer-events:none;transform:translateY(0)}
+.toast.hide{opacity:0;transform:translateY(8px)}
+/* realtime badge */
+.rt-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#4CAF50;margin-right:6px;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+/* spinner */
+.spin{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media(max-width:600px){
+  .fgrid,.dgrid{grid-template-columns:1fr}
+  .fgrid .fg.full,.dgrid .di.full{grid-column:1}
+  table{font-size:13px} td,th{padding:7px 9px}
+  .srow{flex-direction:column}
+  .dsec{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-left">
+    <h1>🏗️ Vendor Management System</h1>
+    <p>ระบบจัดการฐานข้อมูลผู้รับเหมาและผู้จัดจำหน่าย — Real-time Multi-user</p>
+  </div>
+  <div class="pills">
+    <div class="pill"><span class="rt-dot"></span>Real-time</div>
+    <div class="pill" id="hpill">⏳ กำลังโหลด...</div>
+    <div class="pill">📅 08/03/2026</div>
+  </div>
+</div>
+
+<div class="tabbar">
+  <div class="tab on" id="t-search" onclick="goTab('search')">🔍 ค้นหา Vendor</div>
+  <div class="tab" id="t-add" onclick="goTab('add')">➕ เพิ่ม Vendor</div>
+  <div class="tab" id="t-dash" onclick="goTab('dash')">📊 Dashboard</div>
+</div>
+
+<!-- SEARCH -->
+<div class="pnl on" id="pnl-search">
+  <div class="card">
+    <div class="srow">
+      <div class="fg" style="flex:2;min-width:200px">
+        <label>🔍 ค้นหา</label>
+        <input type="text" id="sq" placeholder="ชื่อบริษัท / รหัส / ประเภทงาน / เบอร์โทร..." oninput="search()">
+      </div>
+      <div class="fg">
+        <label>📂 หมวดหมู่</label>
+        <select id="sc" onchange="search()">
+          <option value="">— ทั้งหมด —</option>
+          <option>Structure</option><option>Civil</option><option>MEP</option>
+          <option>Architectural</option><option>Special</option>
+          <option>Piling</option><option>Electrical</option><option>Support</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label>🗺️ ภาค</label>
+        <select id="sr" onchange="search()">
+          <option value="">— ทั้งหมด —</option>
+          <option>กลาง</option><option>เหนือ</option><option>อีสาน</option><option>ใต้</option>
+        </select>
+      </div>
+      <div style="padding-top:22px;display:flex;gap:6px">
+        <button class="btn b-gray b-sm" onclick="clearS()">✕</button>
+        <button class="btn b-outline b-sm" onclick="loadVendors()">🔄</button>
+      </div>
+    </div>
+  </div>
+  <div class="rinfo">
+    <span id="ri">⏳ กำลังโหลด...</span>
+    <button class="btn b-green b-sm" onclick="goTab('add')">➕ เพิ่ม Vendor ใหม่</button>
+  </div>
+  <div class="twrap">
+    <div class="loading" id="tload">⏳ กำลังโหลดข้อมูล...</div>
+    <table id="vtable" style="display:none">
+      <thead><tr>
+        <th>#</th><th>Vendor ID</th><th>รายการงาน</th><th>ชื่อบริษัท</th>
+        <th>ผู้ติดต่อ</th><th>Phone</th><th>หมวด</th><th>ภาค/จังหวัด</th><th></th>
+      </tr></thead>
+      <tbody id="tb"></tbody>
+    </table>
+    <div class="nores" id="nr" style="display:none">
+      <div class="ic">🔍</div>ไม่พบ Vendor ที่ตรงกับเงื่อนไข
+    </div>
+  </div>
+</div>
+
+<!-- ADD -->
+<div class="pnl" id="pnl-add">
+  <div class="card" style="max-width:680px;margin:0 auto">
+    <h2 style="font-size:18px;color:var(--navy);margin-bottom:18px;font-weight:700">➕ เพิ่ม Vendor ใหม่</h2>
+    <div class="fgrid">
+      <div class="fg"><label>Vendor ID <span style="color:var(--red)">*</span></label>
+        <input type="text" id="fi" placeholder="เช่น PILING-049, MEP-012"></div>
+      <div class="fg"><label>หมวดหมู่ <span style="color:var(--red)">*</span></label>
+        <select id="fcat"><option value="">— เลือก —</option>
+          <option>Structure</option><option>Civil</option><option>MEP</option>
+          <option>Architectural</option><option>Special</option><option>Support</option>
+          <option>Piling</option><option>Electrical</option><option>Geotechnical</option>
+        </select></div>
+      <div class="fg full"><label>รายการงาน / บริการ <span style="color:var(--red)">*</span></label>
+        <input type="text" id="fit" placeholder="อธิบายงานที่ Vendor ทำได้"></div>
+      <div class="fg full"><label>ชื่อ Vendor / บริษัท <span style="color:var(--red)">*</span></label>
+        <input type="text" id="fn" placeholder="ชื่อเต็มของบริษัทหรือบุคคล"></div>
+      <div class="fg"><label>ชื่อผู้ติดต่อ</label>
+        <input type="text" id="fco" placeholder="ชื่อ-นามสกุล"></div>
+      <div class="fg"><label>Phone <span style="color:var(--red)">*</span></label>
+        <input type="text" id="fph" placeholder="xxx-xxx-xxxx"></div>
+      <div class="fg"><label>Email</label>
+        <input type="text" id="fem" placeholder="email@company.com"></div>
+      <div class="fg"><label>ภาค <span style="color:var(--red)">*</span></label>
+        <select id="frg"><option value="">— เลือก —</option>
+          <option>กลาง</option><option>เหนือ</option><option>อีสาน</option>
+          <option>ใต้</option><option>ตะวันออก</option><option>ตะวันตก</option>
+        </select></div>
+      <div class="fg"><label>จังหวัด</label>
+        <input type="text" id="fpv" placeholder="ชื่อจังหวัด"></div>
+      <div class="fg full"><label>โครงการอ้างอิง</label>
+        <input type="text" id="fpr" placeholder="รหัสโครงการที่เคยใช้งาน"></div>
+      <div class="fg full"><label>หมายเหตุ</label>
+        <input type="text" id="fcm" placeholder="ข้อมูลเพิ่มเติม"></div>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:18px;padding-top:16px;border-top:1px solid var(--border)">
+      <button class="btn b-gray" onclick="clrForm()">🗑️ ล้างฟอร์ม</button>
+      <button class="btn b-green" id="addBtn" onclick="addV()">✅ บันทึก Vendor</button>
+    </div>
+    <div id="fmsg" class="fmsg"></div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="pnl" id="pnl-dash">
+  <div class="kgrid" id="kg"><div class="loading">⏳ กำลังโหลด...</div></div>
+  <div class="dsec">
+    <div><div class="sec-title">📂 Vendor ตามหมวดหมู่</div><div class="cgrid" id="cg"></div></div>
+    <div><div class="sec-title">🩺 คุณภาพข้อมูล</div><div class="qwrap" id="qg"></div></div>
+  </div>
+</div>
+
+<!-- Detail Modal -->
+<div class="ov" id="dm">
+  <div class="modal">
+    <div class="modal-hdr">
+      <h2 id="dtitle"></h2>
+      <button class="btn b-gray b-sm" onclick="closeDM()">✕ ปิด</button>
+    </div>
+    <div id="dc"></div>
+    <div class="mact">
+      <button class="btn b-amber b-sm" onclick="openEdit()">✏️ แก้ไข</button>
+      <button class="btn b-red b-sm" onclick="delV()">🗑️ ลบ</button>
+      <button class="btn b-gray b-sm" onclick="closeDM()" style="margin-left:auto">ปิด</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="ov" id="em">
+  <div class="modal">
+    <div class="modal-hdr"><h2>✏️ แก้ไข Vendor</h2>
+      <button class="btn b-gray b-sm" onclick="closeEM()">✕</button></div>
+    <div class="fgrid">
+      <div class="fg"><label>Vendor ID</label>
+        <input type="text" id="ei" disabled style="background:#f5f5f5;color:#888;font-family:'IBM Plex Mono',monospace;font-size:13px"></div>
+      <div class="fg"><label>หมวดหมู่</label>
+        <select id="ec"><option value="">— เลือก —</option>
+          <option>Structure</option><option>Civil</option><option>MEP</option>
+          <option>Architectural</option><option>Special</option><option>Support</option>
+          <option>Piling</option><option>Electrical</option><option>Geotechnical</option>
+        </select></div>
+      <div class="fg full"><label>รายการงาน</label><input type="text" id="eit"></div>
+      <div class="fg full"><label>ชื่อ Vendor / บริษัท</label><input type="text" id="en"></div>
+      <div class="fg"><label>ผู้ติดต่อ</label><input type="text" id="eco"></div>
+      <div class="fg"><label>Phone</label><input type="text" id="eph"></div>
+      <div class="fg"><label>Email</label><input type="text" id="eem"></div>
+      <div class="fg"><label>ภาค</label>
+        <select id="erg"><option value="">— เลือก —</option>
+          <option>กลาง</option><option>เหนือ</option><option>อีสาน</option>
+          <option>ใต้</option><option>ตะวันออก</option><option>ตะวันตก</option>
+        </select></div>
+      <div class="fg"><label>จังหวัด</label><input type="text" id="epv"></div>
+      <div class="fg full"><label>โครงการอ้างอิง</label><input type="text" id="epr"></div>
+      <div class="fg full"><label>หมายเหตุ</label><input type="text" id="ecm"></div>
+    </div>
+    <div class="mact">
+      <button class="btn b-gray" onclick="closeEM()">ยกเลิก</button>
+      <button class="btn b-green" id="saveBtn" onclick="saveEdit()">💾 บันทึก</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var vendors=[], cur=-1;
+var API = window.location.origin + '/api';
+
+function g(id){return document.getElementById(id)}
+function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function bCls(c){return({Structure:'bS',Civil:'bC',MEP:'bM',Architectural:'bA',Piling:'bP',Electrical:'bE'})[c]||'bX'}
+
+// ══ API ════════════════════════════════════════════════════════════
+async function api(path,method,body){
+  var opts={method:method||'GET',headers:{'Content-Type':'application/json'}};
+  if(body) opts.body=JSON.stringify(body);
+  var r=await fetch(API+path,opts);
+  return r.json();
+}
+
+// ══ LOAD ══════════════════════════════════════════════════════════
+async function loadVendors(){
+  g('tload').style.display='block';
+  g('vtable').style.display='none';
+  try{
+    vendors = await api('/vendors');
+    g('hpill').textContent='🏢 '+vendors.length+' Vendor';
+    search();
+  }catch(e){ showToast('❌ โหลดข้อมูลไม่สำเร็จ',true); }
+  finally{
+    g('tload').style.display='none';
+    g('vtable').style.display='';
+  }
+}
+
+// Auto-refresh ทุก 30 วินาที (real-time sync)
+setInterval(function(){
+  loadVendors();
+}, 30000);
+
+// ══ TABS ══════════════════════════════════════════════════════════
+function goTab(name){
+  ['search','add','dash'].forEach(function(n){
+    g('t-'+n).classList.toggle('on',n===name);
+    g('pnl-'+n).classList.toggle('on',n===name);
+  });
+  if(name==='dash') loadDash();
+  if(name==='search') setTimeout(function(){g('sq').focus()},100);
+}
+
+// ══ SEARCH ════════════════════════════════════════════════════════
+function search(){
+  var q=g('sq').value.trim(), cat=g('sc').value, reg=g('sr').value;
+  var res=vendors.filter(function(v){
+    var t=v.id+' '+v.item+' '+v.name+' '+v.contact+' '+v.phone+' '+v.email+' '+v.province+' '+v.project;
+    return(!q||t.indexOf(q)>=0)&&(!cat||v.cat===cat)&&(!reg||v.region===reg);
+  });
+  renderTable(res);
+}
+function clearS(){g('sq').value='';g('sc').value='';g('sr').value='';renderTable(vendors);g('sq').focus()}
+
+// ══ TABLE ═════════════════════════════════════════════════════════
+function renderTable(data){
+  var ri=g('ri'),tb=g('tb'),nr=g('nr');
+  ri.innerHTML=data.length===vendors.length
+    ?'แสดง <strong>ทั้งหมด '+data.length+' ราย</strong>'
+    :'พบ <strong>'+data.length+' ราย</strong> จาก '+vendors.length+' ราย';
+  if(!data.length){tb.innerHTML='';nr.style.display='block';return}
+  nr.style.display='none';
+  tb.innerHTML=data.map(function(v,i){
+    var idx=vendors.indexOf(v);
+    var rp=[v.region,v.province].filter(Boolean).join(' / ')||'<span class="miss">ไม่ระบุ</span>';
+    return'<tr onclick="showD('+idx+')">'
+      +'<td style="color:#aaa;font-size:12px;font-family:'IBM Plex Mono',monospace">'+(i+1)+'</td>'
+      +'<td class="tid">'+esc(v.id)+'</td>'
+      +'<td class="titem" title="'+esc(v.item)+'">'+esc(v.item&&v.item.length>40?v.item.slice(0,40)+'…':v.item||'')+'</td>'
+      +'<td class="tname" title="'+esc(v.name)+'">'+esc(v.name&&v.name.length>24?v.name.slice(0,24)+'…':v.name||'')+'</td>'
+      +'<td>'+(v.contact||'<span class="miss">-</span>')+'</td>'
+      +'<td class="tph">'+(v.phone||'<span class="miss">-</span>')+'</td>'
+      +'<td><span class="bdg '+bCls(v.cat)+'">'+esc(v.cat||'?')+'</span></td>'
+      +'<td>'+rp+'</td>'
+      +'<td><button class="btn b-amber b-sm" onclick="event.stopPropagation();showD('+idx+')">👁 ดู</button></td>'
+      +'</tr>';
+  }).join('');
+}
+
+// ══ DETAIL ════════════════════════════════════════════════════════
+function showD(idx){
+  cur=idx; var v=vendors[idx];
+  g('dtitle').textContent=v.id+' — '+v.name;
+  var m=function(val){return val?esc(val):'<span class="miss">ไม่ระบุ</span>'};
+  g('dc').innerHTML='<div class="dgrid">'
+    +'<div class="di"><label>Vendor ID</label><div class="v" style="font-family:'IBM Plex Mono',monospace;font-size:14px">'+esc(v.id)+'</div></div>'
+    +'<div class="di"><label>หมวดหมู่</label><div class="v"><span class="bdg '+bCls(v.cat)+'">'+esc(v.cat||'?')+'</span></div></div>'
+    +'<div class="di full"><label>รายการงาน / บริการ</label><div class="v">'+m(v.item)+'</div></div>'
+    +'<div class="di full"><label>ชื่อ Vendor / บริษัท</label><div class="v" style="font-size:18px">'+m(v.name)+'</div></div>'
+    +'<div class="di"><label>👤 ผู้ติดต่อ</label><div class="v">'+m(v.contact)+'</div></div>'
+    +'<div class="di"><label>📞 Phone</label><div class="v" style="color:var(--blue);font-family:'IBM Plex Mono',monospace">'+m(v.phone)+'</div></div>'
+    +'<div class="di"><label>📧 Email</label><div class="v">'+m(v.email)+'</div></div>'
+    +'<div class="di"><label>🗺️ ภาค / จังหวัด</label><div class="v">'+(v.region&&v.province?v.region+' / '+v.province:(v.region||v.province||'<span class="miss">ไม่ระบุ</span>'))+'</div></div>'
+    +'<div class="di full"><label>โครงการอ้างอิง</label><div class="v" style="font-size:13px">'+m(v.project)+'</div></div>'
+    +'<div class="di full"><label>หมายเหตุ</label><div class="v" style="font-size:13px">'+m(v.comment)+'</div></div>'
+    +'<div class="di"><label>วันที่อัปเดต</label><div class="v" style="font-size:13px">'+m(v.updated)+'</div></div>'
+    +'</div>';
+  g('dm').classList.add('on');
+}
+function closeDM(){g('dm').classList.remove('on')}
+
+// ══ EDIT ══════════════════════════════════════════════════════════
+function openEdit(){
+  var v=vendors[cur];
+  g('ei').value=v.id;g('eit').value=v.item||'';g('en').value=v.name||'';
+  g('eco').value=v.contact||'';g('eph').value=v.phone||'';g('eem').value=v.email||'';
+  g('ec').value=v.cat||'';g('erg').value=v.region||'';g('epv').value=v.province||'';
+  g('epr').value=v.project||'';g('ecm').value=v.comment||'';
+  closeDM();g('em').classList.add('on');
+}
+function closeEM(){g('em').classList.remove('on')}
+async function saveEdit(){
+  var btn=g('saveBtn'); btn.innerHTML='<span class="spin"></span>กำลังบันทึก...'; btn.disabled=true;
+  var v=vendors[cur];
+  var data={id:v.id,item:g('eit').value,name:g('en').value,contact:g('eco').value,
+    phone:g('eph').value,email:g('eem').value,cat:g('ec').value,region:g('erg').value,
+    province:g('epv').value,project:g('epr').value,comment:g('ecm').value,status:v.status||'Active'};
+  try{
+    var res=await api('/vendors/'+v.id,'PUT',data);
+    if(res.ok){closeEM();await loadVendors();showToast('✅ แก้ไข '+v.id+' เรียบร้อย');}
+    else showToast('❌ '+res.error,true);
+  }catch(e){showToast('❌ เกิดข้อผิดพลาด',true);}
+  finally{btn.innerHTML='💾 บันทึก';btn.disabled=false;}
+}
+
+// ══ DELETE ════════════════════════════════════════════════════════
+async function delV(){
+  var v=vendors[cur];
+  if(!confirm('ลบ Vendor: '+v.id+'
+'+v.name+'
+
+ยืนยันการลบ?')) return;
+  try{
+    var res=await api('/vendors/'+v.id,'DELETE');
+    if(res.ok){closeDM();await loadVendors();showToast('🗑️ ลบ '+v.id+' เรียบร้อย');}
+    else showToast('❌ '+res.error,true);
+  }catch(e){showToast('❌ เกิดข้อผิดพลาด',true);}
+}
+
+// ══ ADD ═══════════════════════════════════════════════════════════
+async function addV(){
+  var id=g('fi').value.trim(),item=g('fit').value.trim();
+  var name=g('fn').value.trim(),phone=g('fph').value.trim();
+  var msg=g('fmsg'),btn=g('addBtn');
+  if(!id||!item||!name||!phone){
+    msg.className='fmsg err';msg.textContent='⚠️ กรุณากรอกข้อมูลที่มี * ให้ครบ';return;
+  }
+  btn.innerHTML='<span class="spin"></span>กำลังบันทึก...';btn.disabled=true;
+  try{
+    var res=await api('/vendors','POST',{id,item,name,contact:g('fco').value,phone,
+      email:g('fem').value,cat:g('fcat').value,region:g('frg').value,
+      province:g('fpv').value,project:g('fpr').value,comment:g('fcm').value});
+    if(res.ok){
+      msg.className='fmsg ok';msg.textContent='✅ เพิ่ม '+id+' เรียบร้อยแล้ว!';
+      clrForm();await loadVendors();
+      setTimeout(function(){msg.className='fmsg';goTab('search')},1500);
+    } else {msg.className='fmsg err';msg.textContent='❌ '+res.error;}
+  }catch(e){msg.className='fmsg err';msg.textContent='❌ เกิดข้อผิดพลาด';}
+  finally{btn.innerHTML='✅ บันทึก Vendor';btn.disabled=false;}
+}
+function clrForm(){
+  ['fi','fit','fn','fco','fph','fem','fpv','fpr','fcm'].forEach(function(x){g(x).value=''});
+  g('fcat').value='';g('frg').value='';g('fmsg').className='fmsg';
+}
+
+// ══ DASHBOARD ═════════════════════════════════════════════════════
+async function loadDash(){
+  try{
+    var s=await api('/stats');
+    var total=s.total;
+    g('kg').innerHTML=[
+      ['var(--navy)','🏢',total,'Vendor ทั้งหมด'],
+      ['var(--green)','✅',total-s.miss_cat,'มี Category'],
+      ['var(--red)','⚠️',s.miss_email,'ขาด Email'],
+      ['var(--gold)','🗺️',s.miss_region,'ขาด Region'],
+    ].map(function(k){
+      return'<div class="kc" style="border-top-color:'+k[0]+'">'
+        +'<div style="font-size:26px">'+k[1]+'</div>'
+        +'<div class="kv" style="color:'+k[0]+'">'+k[2]+'</div>'
+        +'<div class="kl">'+k[3]+'</div></div>';
+    }).join('');
+    var cc={Structure:'#D6E4F7',Civil:'#E2EFDA',MEP:'#FFF2CC',Architectural:'#FCE4D6',Piling:'#FFDEDE',Electrical:'#D6EEF2'};
+    g('cg').innerHTML=Object.entries(s.categories).sort(function(a,b){return b[1]-a[1]}).map(function(e){
+      return'<div class="cc" style="background:'+(cc[e[0]]||'#f5f5f5')+'">'
+        +'<div><div class="cn">'+e[0]+'</div><div style="font-size:11px;color:#888">'+(e[1]/total*100).toFixed(1)+'%</div></div>'
+        +'<div class="cv">'+e[1]+'</div></div>';
+    }).join('');
+    var ql=[['Vendor ID',total,total],['ชื่อ Vendor',total,total],
+      ['Phone',total-s.miss_phone,total],['Email',total-s.miss_email,total],
+      ['Category',total-s.miss_cat,total],['Region',total-s.miss_region,total]];
+    g('qg').innerHTML=ql.map(function(q){
+      var pct=Math.round(q[1]/q[2]*100);
+      var col=pct>=90?'#375623':pct>=50?'#BF8F00':'#C00000';
+      return'<div class="qrow"><div class="qlbl">'+q[0]+'</div>'
+        +'<div class="qbg"><div class="qfill" style="width:'+pct+'%;background:'+col+'"></div></div>'
+        +'<div class="qpct" style="color:'+col+'">'+pct+'%</div></div>';
+    }).join('');
+  }catch(e){g('kg').innerHTML='<div style="color:#C00000">❌ โหลดไม่สำเร็จ</div>';}
+}
+
+// ══ TOAST ═════════════════════════════════════════════════════════
+function showToast(msg,isErr){
+  var t=document.getElementById('toast');
+  if(!t){t=document.createElement('div');t.id='toast';t.className='toast';document.body.appendChild(t);}
+  t.textContent=msg;t.style.background=isErr?'#C00000':'#1F3864';
+  t.style.color='#fff';t.classList.remove('hide');
+  clearTimeout(t._to);
+  t._to=setTimeout(function(){t.classList.add('hide')},2800);
+}
+
+// ══ INIT ══════════════════════════════════════════════════════════
+loadVendors();
+</script>
+</body></html>
