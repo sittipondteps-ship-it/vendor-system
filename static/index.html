@@ -227,12 +227,12 @@ td{padding:9px 13px;vertical-align:middle}
       <div class="fg"><label>Email</label>
         <input type="text" id="fem" placeholder="email@company.com"></div>
       <div class="fg"><label>ภาค</label>
-        <select id="frg"><option value="">— เลือก —</option>
+        <select id="frg" onchange="updateProvinces('frg','fpv')"><option value="">— เลือก —</option>
           <option>กลาง</option><option>เหนือ</option><option>อีสาน</option>
           <option>ใต้</option><option>ตะวันออก</option><option>ตะวันตก</option>
         </select></div>
       <div class="fg"><label>จังหวัด</label>
-        <input type="text" id="fpv" placeholder="ชื่อจังหวัด"></div>
+        <select id="fpv"><option value="">— เลือกภาคก่อน —</option></select></div>
       <div class="fg full"><label>โครงการอ้างอิง</label>
         <input type="text" id="fpr" placeholder="รหัสโครงการที่เคยใช้งาน"></div>
       <div class="fg full"><label>หมายเหตุ</label>
@@ -291,11 +291,12 @@ td{padding:9px 13px;vertical-align:middle}
       <div class="fg"><label>Phone</label><input type="text" id="eph"></div>
       <div class="fg"><label>Email</label><input type="text" id="eem"></div>
       <div class="fg"><label>ภาค</label>
-        <select id="erg"><option value="">— เลือก —</option>
+        <select id="erg" onchange="updateProvinces('erg','epv')"><option value="">— เลือก —</option>
           <option>กลาง</option><option>เหนือ</option><option>อีสาน</option>
           <option>ใต้</option><option>ตะวันออก</option><option>ตะวันตก</option>
         </select></div>
-      <div class="fg"><label>จังหวัด</label><input type="text" id="epv"></div>
+      <div class="fg"><label>จังหวัด</label>
+        <select id="epv"><option value="">— เลือกภาคก่อน —</option></select></div>
       <div class="fg full"><label>โครงการอ้างอิง</label><input type="text" id="epr"></div>
       <div class="fg full"><label>หมายเหตุ</label><input type="text" id="ecm"></div>
     </div>
@@ -352,7 +353,26 @@ function goTab(name){
   if(name==='search') setTimeout(function(){g('sq').focus()},100);
 }
 
-// ══ SEARCH ════════════════════════════════════════════════════════
+// ══ PROVINCES ═════════════════════════════════════════════════════
+var PROVINCES={
+  'กลาง':['กรุงเทพมหานคร','นนทบุรี','ปทุมธานี','พระนครศรีอยุธยา','อ่างทอง','ลพบุรี','สิงห์บุรี','ชัยนาท','สระบุรี','นครนายก','สุพรรณบุรี','นครปฐม','สมุทรสาคร','สมุทรสงคราม','สมุทรปราการ'],
+  'เหนือ':['เชียงใหม่','เชียงราย','ลำพูน','ลำปาง','อุตรดิตถ์','แพร่','น่าน','พะเยา','แม่ฮ่องสอน','สุโขทัย','พิษณุโลก','พิจิตร','กำแพงเพชร','ตาก','นครสวรรค์','อุทัยธานี','เพชรบูรณ์'],
+  'อีสาน':['นครราชสีมา','บุรีรัมย์','สุรินทร์','ศรีสะเกษ','อุบลราชธานี','ยโสธร','ชัยภูมิ','อำนาจเจริญ','บึงกาฬ','หนองบัวลำภู','ขอนแก่น','อุดรธานี','เลย','หนองคาย','มหาสารคาม','ร้อยเอ็ด','กาฬสินธุ์','สกลนคร','นครพนม','มุกดาหาร'],
+  'ใต้':['นครศรีธรรมราช','กระบี่','พังงา','ภูเก็ต','สุราษฎร์ธานี','ระนอง','ชุมพร','สงขลา','สตูล','ตรัง','พัทลุง','ปัตตานี','ยะลา','นราธิวาส'],
+  'ตะวันออก':['ฉะเชิงเทรา','ชลบุรี','ระยอง','จันทบุรี','ตราด','ปราจีนบุรี','สระแก้ว'],
+  'ตะวันตก':['ราชบุรี','กาญจนบุรี','เพชรบุรี','ประจวบคีรีขันธ์','สมุทรสงคราม']
+};
+function updateProvinces(rgId, pvId, selectedVal){
+  var reg=g(rgId).value, sel=g(pvId);
+  var provs=PROVINCES[reg]||[];
+  sel.innerHTML=provs.length
+    ?'<option value="">— เลือกจังหวัด —</option>'+provs.map(function(p){
+        return'<option'+(p===selectedVal?' selected':'')+'>'+p+'</option>';
+      }).join('')
+    :'<option value="">— เลือกภาคก่อน —</option>';
+}
+
+
 function search(){
   var q=g('sq').value.trim(), cat=g('sc').value, reg=g('sr').value;
   var res=vendors.filter(function(v){
@@ -417,7 +437,8 @@ function openEdit(){
   var v=vendors[cur];
   g('ei').value=v.id;g('eit').value=v.item||'';g('en').value=v.name||'';
   g('eco').value=v.contact||'';g('eph').value=v.phone||'';g('eem').value=v.email||'';
-  g('ec').value=v.cat||'';g('erg').value=v.region||'';g('epv').value=v.province||'';
+  g('ec').value=v.cat||'';g('erg').value=v.region||'';
+  updateProvinces('erg','epv',v.province||'');
   g('epr').value=v.project||'';g('ecm').value=v.comment||'';
   closeDM();g('em').classList.add('on');
 }
@@ -469,8 +490,9 @@ async function addV(){
   finally{btn.innerHTML='✅ บันทึก Vendor';btn.disabled=false;}
 }
 function clrForm(){
-  ['fi','fit','fn','fco','fph','fem','fpv','fpr','fcm'].forEach(function(x){g(x).value=''});
+  ['fi','fit','fn','fco','fph','fem','fpr','fcm'].forEach(function(x){g(x).value=''});
   g('fcat').value='';g('frg').value='';g('fmsg').className='fmsg';
+  g('fpv').innerHTML='<option value="">— เลือกภาคก่อน —</option>';
 }
 
 // ══ DASHBOARD ═════════════════════════════════════════════════════
