@@ -167,6 +167,7 @@ td{padding:9px 13px;vertical-align:middle}
           <option>Structure</option><option>Civil</option><option>MEP</option>
           <option>Architectural</option><option>Special</option>
           <option>Piling</option><option>Electrical</option><option>Support</option>
+          <option value="__empty__">⚠️ ไม่ระบุหมวด</option>
         </select>
       </div>
       <div class="fg">
@@ -174,6 +175,7 @@ td{padding:9px 13px;vertical-align:middle}
         <select id="sr" onchange="search()">
           <option value="">— ทั้งหมด —</option>
           <option>กลาง</option><option>เหนือ</option><option>อีสาน</option><option>ใต้</option>
+          <option value="__empty__">⚠️ ไม่ระบุภาค</option>
         </select>
       </div>
       <div style="padding-top:22px;display:flex;gap:6px">
@@ -355,7 +357,9 @@ function search(){
   var q=g('sq').value.trim(), cat=g('sc').value, reg=g('sr').value;
   var res=vendors.filter(function(v){
     var t=v.id+' '+v.item+' '+v.name+' '+v.contact+' '+v.phone+' '+v.email+' '+v.province+' '+v.project;
-    return(!q||t.indexOf(q)>=0)&&(!cat||v.cat===cat)&&(!reg||v.region===reg);
+    var catMatch = !cat || (cat==='__empty__' ? !v.cat : v.cat===cat);
+    var regMatch = !reg || (reg==='__empty__' ? !v.region : v.region===reg);
+    return(!q||t.indexOf(q)>=0)&&catMatch&&regMatch;
   });
   renderTable(res);
 }
