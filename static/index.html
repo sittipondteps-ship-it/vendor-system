@@ -392,7 +392,7 @@ function showD(idx){
   g('dtitle').textContent=v.id+' — '+v.name;
   var m=function(val){return val?esc(val):'<span class="miss">ไม่ระบุ</span>'};
   g('dc').innerHTML='<div class="dgrid">'
-    +'<div class="di"><label>Vendor ID</label><div class="v" style="font-family:'IBM Plex Mono',monospace;font-size:14px">'+esc(v.id)+'</div></div>'
+    +'<div class="di"><label>Vendor ID</label><div class="v" style="font-family:IBM Plex Mono,monospace;font-size:14px">'+esc(v.id)+'</div></div>'
     +'<div class="di"><label>หมวดหมู่</label><div class="v"><span class="bdg '+bCls(v.cat)+'">'+esc(v.cat||'?')+'</span></div></div>'
     +'<div class="di full"><label>รายการงาน / บริการ</label><div class="v">'+m(v.item)+'</div></div>'
     +'<div class="di full"><label>ชื่อ Vendor / บริษัท</label><div class="v" style="font-size:18px">'+m(v.name)+'</div></div>'
