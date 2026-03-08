@@ -276,7 +276,7 @@ td{padding:9px 13px;vertical-align:middle}
       <button class="btn b-gray b-sm" onclick="closeEM()">✕</button></div>
     <div class="fgrid">
       <div class="fg"><label>Vendor ID</label>
-        <input type="text" id="ei" disabled style="background:#f5f5f5;color:#888;font-family:"IBM Plex Mono",monospace;font-size:13px"></div>
+        <input type="text" id="ei" disabled style="background:#f5f5f5;color:#888;font-family:'IBM Plex Mono',monospace;font-size:13px"></div>
       <div class="fg"><label>หมวดหมู่</label>
         <select id="ec"><option value="">— เลือก —</option>
           <option>Structure</option><option>Civil</option><option>MEP</option>
@@ -373,7 +373,7 @@ function renderTable(data){
     var idx=vendors.indexOf(v);
     var rp=[v.region,v.province].filter(Boolean).join(' / ')||'<span class="miss">ไม่ระบุ</span>';
     return'<tr onclick="showD('+idx+')">'
-      +'<td style="color:#aaa;font-size:12px;font-family:"IBM Plex Mono",monospace">'+(i+1)+'</td>'
+      +'<td style="color:#aaa;font-size:12px;font-family:'IBM Plex Mono',monospace">'+(i+1)+'</td>'
       +'<td class="tid">'+esc(v.id)+'</td>'
       +'<td class="titem" title="'+esc(v.item)+'">'+esc(v.item&&v.item.length>40?v.item.slice(0,40)+'…':v.item||'')+'</td>'
       +'<td class="tname" title="'+esc(v.name)+'">'+esc(v.name&&v.name.length>24?v.name.slice(0,24)+'…':v.name||'')+'</td>'
@@ -392,12 +392,12 @@ function showD(idx){
   g('dtitle').textContent=v.id+' — '+v.name;
   var m=function(val){return val?esc(val):'<span class="miss">ไม่ระบุ</span>'};
   g('dc').innerHTML='<div class="dgrid">'
-    +'<div class="di"><label>Vendor ID</label><div class="v" style="font-family:"IBM Plex Mono",monospace;font-size:14px">'+esc(v.id)+'</div></div>'
+    +'<div class="di"><label>Vendor ID</label><div class="v" style="font-family:'IBM Plex Mono',monospace;font-size:14px">'+esc(v.id)+'</div></div>'
     +'<div class="di"><label>หมวดหมู่</label><div class="v"><span class="bdg '+bCls(v.cat)+'">'+esc(v.cat||'?')+'</span></div></div>'
     +'<div class="di full"><label>รายการงาน / บริการ</label><div class="v">'+m(v.item)+'</div></div>'
     +'<div class="di full"><label>ชื่อ Vendor / บริษัท</label><div class="v" style="font-size:18px">'+m(v.name)+'</div></div>'
     +'<div class="di"><label>👤 ผู้ติดต่อ</label><div class="v">'+m(v.contact)+'</div></div>'
-    +'<div class="di"><label>📞 Phone</label><div class="v" style="color:var(--blue);font-family:"IBM Plex Mono",monospace">'+m(v.phone)+'</div></div>'
+    +'<div class="di"><label>📞 Phone</label><div class="v" style="color:var(--blue);font-family:'IBM Plex Mono',monospace">'+m(v.phone)+'</div></div>'
     +'<div class="di"><label>📧 Email</label><div class="v">'+m(v.email)+'</div></div>'
     +'<div class="di"><label>🗺️ ภาค / จังหวัด</label><div class="v">'+(v.region&&v.province?v.region+' / '+v.province:(v.region||v.province||'<span class="miss">ไม่ระบุ</span>'))+'</div></div>'
     +'<div class="di full"><label>โครงการอ้างอิง</label><div class="v" style="font-size:13px">'+m(v.project)+'</div></div>'
